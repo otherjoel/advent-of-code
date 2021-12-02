@@ -27,7 +27,7 @@
              [aim 0]
              #:result (* (real-part pos) (imag-part pos)))
             ([move (in-list input)])
-    (values (+ pos (make-rectangular (* 1 (real-part move)) (* aim (real-part move))))
+    (values (+ pos (real-part move) (* 0+1i aim (real-part move)))
             (+ aim (imag-part move)))))
 
 (module+ test
