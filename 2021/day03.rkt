@@ -24,14 +24,13 @@
         (read-cols! rem (+ col 1))])]))
 
 (define (calc)
-  (define-values (gamma epsilon)
-    (for/fold ([g-accum 0]
-               [e-accum 0])
-              ([c (in-vector cols)]
-               [i (in-range 11 -1 -1)])
-      (values (+ g-accum (* (if (eq? c #\1) 1 0) (expt 2 i)))
-              (+ e-accum (* (if (eq? c #\1) 0 1) (expt 2 i))))))
-  (* gamma epsilon))
+  (for/fold ([gamma 0]
+             [epsilon 0]
+             #:result (* gamma epsilon))
+            ([c (in-vector cols)]
+             [i (in-range 11 -1 -1)])
+    (values (+ gamma (* (if (eq? c #\1) 1 0) (expt 2 i)))
+            (+ epsilon (* (if (eq? c #\1) 0 1) (expt 2 i))))))
 
 (define (part-1)
   (with-input-from-file "day03.txt" read-cols!)
@@ -60,7 +59,6 @@
              [pos 12])
     (define filter-bit (common-bitval comp lst pos))
     (define remaining (filter (lambda (n) (eq? (bit-at n pos) filter-bit)) lst))
-    (displayln remaining)
     (if (null? (cdr remaining))
         (car remaining)
         (loop remaining (- pos 1)))))
@@ -68,3 +66,17 @@
 (define (part-2)
   (* (filter-numbers most)
      (filter-numbers least)))
+
+(module+ test
+  (check-answer part-2 482500))
+
+(define (get-rate lst comp)
+  (for/sum ([i (in-range 12 0 -1)])
+    (* (common-bitval comp input i) (expt 2 (- i 1)))))
+
+(define (part1-redux)
+  (* (get-rate input most)
+     (get-rate input least)))
+
+(module+ test
+  (check-answer part1-redux 1307354))
