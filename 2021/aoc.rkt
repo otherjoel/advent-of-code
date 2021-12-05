@@ -3,7 +3,8 @@
 (require (for-syntax racket/base))
 (require rackunit)
 
-(provide (all-defined-out))
+(provide (all-defined-out)
+         (all-from-out rackunit))
 
 (define-syntax (check-answer stx)
   (syntax-case stx ()
