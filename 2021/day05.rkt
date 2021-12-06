@@ -52,7 +52,7 @@
 
 (module+ test
   (check-answer part-1 5169)   ; part-1: 5169 (cpu: 138 real: 139 gc: 9) 
-  (check-answer part-2 22083)) ; part-2: 22083 (cpu: 500 real: 500 gc: 16)ß
+  (check-answer part-2 22083)) ; part-2: 22083 (cpu: 500 real: 500 gc: 16)
 
 (module+ test
   (define test-input
