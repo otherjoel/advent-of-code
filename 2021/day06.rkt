@@ -16,7 +16,7 @@
     [else
      (define 1st-gen-spawns (+ 1 (quotient (- days first-spawn-day) 7)))
      (+ 1st-gen-spawns
-        (for/sum ([days-remaining (in-range (max (- days first-spawn-day) 0) -1 -7)])
+        (for/sum ([days-remaining (in-range (- days first-spawn-day) -1 -7)])
           (fish-spawns 8 days-remaining)))]))
 
 (define fish-spawns
