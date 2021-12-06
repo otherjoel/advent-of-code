@@ -1,8 +1,7 @@
 #lang racket/base
 
 (require racket/file
-         racket/string
-         sugar/cache)
+         racket/string)
 
 (module+ test (require "aoc.rkt"))
 
@@ -10,7 +9,7 @@
 
 (define input (get-input (string-trim (file->string "day06.txt"))))
 
-(define/caching (fish-spawns fish-tval days)
+(define (fish-spawns-base fish-tval days)
   (define first-spawn-day (+ 1 fish-tval))
   (cond
     [(> first-spawn-day days) 0]
@@ -19,6 +18,10 @@
      (+ 1st-gen-spawns
         (for/sum ([days-remaining (in-range (max (- days first-spawn-day) 0) -1 -7)])
           (fish-spawns 8 days-remaining)))]))
+
+(define fish-spawns
+  (let ([cache (make-hash)])
+    (lambda (f d) (hash-ref! cache (cons f d) (λ () (fish-spawns-base f d))))))
 
 (define (fish-after-days lst days)
   (define spawns (map (lambda (n) (fish-spawns n days)) lst))
