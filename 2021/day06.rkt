@@ -31,8 +31,8 @@
 (define (part-2) (fish-after-days input 256))
 
 (module+ test
-  (check-answer part-1 374994)         ; part-1: 374994 (cpu: 0 real: 0 gc: 0)
-  (check-answer part-2 1686252324092)) ; part-2: 1686252324092 (cpu: 0 real: 0 gc: 0)
+  (check-answer/ns part-1 374994)         ; part-1: 374994 (65 μs)
+  (check-answer/ns part-2 1686252324092)) ; part-2: 1686252324092 (213 μs)
 
 (module+ test
   (define test-fish '(3 4 3 1 2))

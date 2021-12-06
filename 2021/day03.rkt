@@ -1,7 +1,6 @@
 #lang racket/base
 
-(require "aoc.rkt"
-         racket/file
+(require racket/file
          racket/math)
 
 (define input (map (lambda (s) (string->number s 2)) (file->lines "day03.txt")))
@@ -24,7 +23,8 @@
      (get-rate input least)))
 
 (module+ test
-  (check-answer part-1 1307354)) ; part-1: 1307354 (cpu: 1 real: 1 gc: 0)
+  (require "aoc.rkt")
+  (check-answer/ns part-1 1307354)) ; part-1: 1307354 (339 μs)
 
 (define (filter-numbers comp)
   (let loop ([lst input]
@@ -40,4 +40,4 @@
      (filter-numbers least)))
 
 (module+ test
-  (check-answer part-2 482500)) ; part-2: 482500 (cpu: 0 real: 0 gc: 0)
+  (check-answer/ns part-2 482500)) ; part-2: 482500 (125 μs)

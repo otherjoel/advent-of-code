@@ -1,7 +1,6 @@
 #lang racket/base
 
-(require "aoc.rkt"
-         racket/file
+(require racket/file
          rackunit)
 
 (define dirs (hasheq 'forward 1 'up 0-1i 'down 0+1i))
@@ -20,7 +19,8 @@
      (imag-part sum)))
 
 (module+ test
-  (check-answer part-1 1882980)) ; part-1: 1882980 (cpu: 0 real: 0 gc: 0)
+  (require "aoc.rkt")
+  (check-answer/ns part-1 1882980)) ; part-1: 1882980 (19 μs)
 
 (define (part-2)
   (for/fold ([pos 0]
@@ -31,4 +31,4 @@
             (+ aim (imag-part move)))))
 
 (module+ test
-  (check-answer part-2 1971232560)) ; part-2: 1971232560 (cpu: 0 real: 0 gc: 0)
+  (check-answer/ns part-2 1971232560)) ; part-2: 1971232560 (47 μs)
