@@ -22,13 +22,9 @@
 
 (define (average vec) (/ (for/sum ([v (in-vector vec)]) v) (vector-length vec)))
 
-(define sum-to/cache
-  (let ([cache (make-hasheqv)])
-    (lambda (n) (hash-ref! cache n (lambda () (if (eqv? 0 n) 0 (+ n (sum-to/cache (- n 1)))))))))
-
 (define (fuel-to/new vec pos)
-  (for*/sum ([v (in-vector vec)])
-    (sum-to/cache (abs (- v pos)))))
+  (for/sum ([v (in-vector vec)])
+    (let ([dist (abs (- v pos))]) (/ (* dist (+ 1 dist)) 2)))) ; n(n+1)/2 = sum of 1 to n
 
 (define (optimal-fuel vec)
   (let ([avg (average vec)])
