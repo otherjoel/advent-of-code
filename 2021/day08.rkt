@@ -25,13 +25,13 @@
 (struct display (wiremap outputs) #:transparent)
 
 (define (str->wires str)
-  (list->set (filter (λ (s) (not (eq? s '||))) (map string->symbol (string-split str "")))))
+  (list->seteqv (filter (λ (s) (not (eq? s '||))) (map string->symbol (string-split str "")))))
 
 (define (find-set lst segment-count [proc (λ (s) #t)]) 
   (car (filter (λ (s) (and (eqv? (set-count s) segment-count) (proc s))) lst)))
 
 (define (contains s) (lambda (s2) (subset? s s2)))
-(define (isnt . x) (lambda (s) (andmap not (map (curry equal? s) x))))
+(define (isnt . x) (lambda (s) (not (member s x))))
 
 (define (infer-wiremap samples)
   (match-define (list One Four Seven Eight) (map (curry find-set samples) '(2 4 3 7)))
@@ -69,7 +69,7 @@
 (define (part-2)
   (sum-outputs (map parse input)))
 
-(module+ test (check-answer part-2 1084606)) ; part-2: 1084606 (cpu: 10 real: 10 gc: 0)
+(module+ test (check-answer/ns part-2 1084606)) ; part-2: 1084606 (9617 μs)
 
 (module+ test
   (define test-input
