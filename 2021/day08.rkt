@@ -25,7 +25,7 @@
 (struct display (wiremap outputs) #:transparent)
 
 (define (str->wires str)
-  (list->seteqv (filter (λ (s) (not (eq? s '||))) (map string->symbol (string-split str "")))))
+  (list->seteq (filter (λ (s) (not (eq? s '||))) (map string->symbol (string-split str "")))))
 
 (define (find-set lst segment-count [proc (λ (s) #t)]) 
   (car (filter (λ (s) (and (eqv? (set-count s) segment-count) (proc s))) lst)))
@@ -69,7 +69,7 @@
 (define (part-2)
   (sum-outputs (map parse input)))
 
-(module+ test (check-answer/ns part-2 1084606)) ; part-2: 1084606 (9617 μs)
+(module+ test (check-answer/ns part-2 1084606)) ; part-2: 1084606 (9588 μs)
 
 (module+ test
   (define test-input
