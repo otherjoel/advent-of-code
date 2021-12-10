@@ -1,11 +1,10 @@
 #lang racket/base
 
 (require "aoc.rkt"
-         racket/file
+         racket/list
          racket/match
-         sugar/cache)
-
-(define rect make-rectangular)
+         racket/set
+         racket/vector)
 
 (define (parse! [p (current-input-port)])
   (define m (make-hasheqv))
@@ -13,62 +12,63 @@
     (match (read-byte p)
       [(? eof-object?) m]
       [10 (loop (add1 row) 0)]
-      [(var b) (hash-set! m (rect col row) (- b 48)) (loop row (+ 1 col))])))
-
-(define/caching (topo-bounds t)
-  (list (apply max (map real-part (hash-keys t)))
-        (apply max (map imag-part (hash-keys t)))))
+      [(var b)
+       (hash-set! m (make-rectangular col row) (- b 48))
+       (loop row (+ 1 col))])))
 
 (define input (with-input-from-file "day09.txt" parse!))
 
-(define (neighbors t pos)
-  (match-define (list ux uy) (topo-bounds t))
-  (define x (real-part pos))
-  (define y (imag-part pos))
-  (filter (λ (x) x) 
-          (list (and (> x 0) (rect (sub1 x) y))
-                (and (< x ux)  (rect (add1 x) y))
-                (and (> y 0) (rect x (sub1 y)))
-                (and (< y uy) (rect x (add1 y))))))
-
-(define (neighbor-vals topo pos)
-  (map (λ (x) (hash-ref topo x)) (neighbors topo pos)))
+(define (mapref t x y) (hash-ref t (make-rectangular x y) 10))
 
 (define (low-spot-risklevels topo)
-  (for/sum ([(pos v) (in-hash topo)]
-            #:when (andmap (λ (n) (< v n)) (neighbor-vals topo pos)))
-    (add1 v)))
+  (for/sum ([(pos v) (in-hash topo)])
+    (define x (real-part pos))
+    (define y (imag-part pos))
+    (or (and (< v (mapref topo (sub1 x) y))
+             (< v (mapref topo (add1 x) y))
+             (< v (mapref topo x (sub1 y)))
+             (< v (mapref topo x (add1 y)))
+             (add1 v))
+        0)))
 
 (define (part-1) (low-spot-risklevels input))
 
-(module+ test (check-answer part-1 560)) ; part-1: 560 (cpu: 4226 real: 4338 gc: 5) 😜
+(module+ test (check-answer/ns part-1 560)) ; part-1: 60 (9796 μs)
 
-(define (downhill-step topo pos)
-  (define v (hash-ref topo pos))
-  (findf (λ (n) (< (hash-ref topo n) v))
-         (neighbors topo pos)))
+(define (neighbors pos)
+  (let ([x (real-part pos)]
+        [y (imag-part pos)])
+    (list
+     (make-rectangular (sub1 x) y)
+     (make-rectangular (add1 x) y)
+     (make-rectangular x (sub1 y))
+     (make-rectangular x (add1 y)))))
 
-(define/caching (trace-low-spot topo pos)
-  (let ([next (downhill-step topo pos)])
-    (cond [(not next) pos]
-          [else (trace-low-spot topo next)])))
+(define (basin-size topo pos)
+  (define visited (mutable-seteqv))
+  (let loop ([p pos])
+    (define v (hash-ref topo p 9))
+    (cond
+      [(= v 9) 0]
+      [else
+       (add1 (for*/sum ([n (in-list (neighbors p))]
+                        #:unless (set-member? visited n)
+                        #:when (< v (hash-ref topo n -1)))
+               (set-add! visited n)
+               (loop n)))])))
 
-(define (find-basin-sizes topo)
-  (define basins (make-hasheqv))
-  (for ([(pos v) (in-hash topo)] #:when (< v 9))
-    (let ([end (trace-low-spot topo pos)])
-      (hash-set! basins end (cons pos (hash-ref basins end '())))))
-  (sort (map length (hash-values basins)) >))
+(define (measure-basins topo)
+  (define szs
+    (for/vector ([(pos v) (in-hash topo)]
+               #:when (andmap (λ (np) (< v (hash-ref topo np 10)))
+                              (neighbors pos)))
+      (basin-size topo pos)))
+  (for/product ([v (in-vector (vector-take (vector-sort szs >) 3))]) v))
 
-(define (largest-basins-product topo)
-  (match (find-basin-sizes topo) [(list b1 b2 b3 bs ...) (* b1 b2 b3)]))
+(define (part-2) (measure-basins input))
 
-(define (part-2)
-  (largest-basins-product input))
+(module+ test (check-answer/ns part-2 959136) ; part-2: 959136 (26472 μs)
 
-(module+ test (check-answer part-2 959136)) ; part-2: 959136 (cpu: 15548 real: 15966 gc: 13) 🤮
-
-(module+ test
   (define test-input #<<EOF
 2199943210
 3987894921
@@ -79,4 +79,4 @@ EOF
     )
   (define test-topo (parse! (open-input-string test-input)))
   (check-equal? (low-spot-risklevels test-topo) 15)
-  (check-equal? (largest-basins-product test-topo) 1134))
+  (check-equal? (measure-basins test-topo) 1134))
