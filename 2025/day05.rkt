@@ -7,7 +7,7 @@
          racket/string
          threading)
 
-;; Part 1 ----------------------------------------
+;; Input ----------------------------------------
 
 (define (string->set str)
   (~> (string-split str "-")
@@ -28,6 +28,8 @@
       (define id (string->number i))
       (union s (make-integer-set `((,id . ,id))))))
   (values fresh-set ingreds))
+
+;; Part 1 ----------------------------------------
 
 (define-values (f i) (parse (file->lines "day05-input.txt")))
 
