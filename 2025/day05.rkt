@@ -10,11 +10,8 @@
 ;; Input ----------------------------------------
 
 (define (string->set str)
-  (~> (string-split str "-")
-      (map string->number _)
-      (apply cons _)
-      list
-      make-integer-set))
+  (define-values (beg end) (~> (string-split str "-") (map string->number _) (apply values _)))
+  (make-integer-set (list (cons beg end))))
 
 (define (parse lines)
   (define-values (range-lines ingred-lines) (splitf-at lines non-empty-string?))
@@ -29,9 +26,12 @@
       (union s (make-integer-set `((,id . ,id))))))
   (values fresh-set ingreds))
 
+(define (parse-input) (parse (file->lines "day05-input.txt")))
+(display-time/ns (λ () (parse-input) 'done) 'parse-input)       ; 1 ms
+
 ;; Part 1 ----------------------------------------
 
-(define-values (f i) (parse (file->lines "day05-input.txt")))
+(define-values (f i) (parse-input))
 
 (define (pt1) (count (intersect f i)))
 (check-answer/ns pt1 563)
