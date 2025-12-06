@@ -27,7 +27,7 @@
   (values fresh-set ingreds))
 
 (define (parse-input) (parse (file->lines "day05-input.txt")))
-(display-time/ns (λ () (parse-input) 'done) 'parse-input)       ; 1 ms
+(display-time/ns (λ () (parse-input) 'done))       ; 1 ms
 
 ;; Part 1 ----------------------------------------
 

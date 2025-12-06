@@ -34,8 +34,8 @@
     [(> ns 1000) (format "~a μs" (quotient ns 1000))]
     [else (format "~a ns" ns)]))
 
-(define (display-time/ns thunk who)
-  (define-values (results avg-ns) (time-proc/ns thunk 1))
+(define (display-time/ns thunk [rounds 1] [who (object-name thunk)])
+  (define-values (results avg-ns) (time-proc/ns thunk rounds))
   (displayln (format "~a: ~a (~a)" who results (fmt-ns avg-ns))))
 
 (define-syntax (check-answer/ns stx)
