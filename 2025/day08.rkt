@@ -25,35 +25,14 @@
   (define dz (fl- (flvector-ref v1 2) (flvector-ref v2 2)))
   (fl+ (fl* dx dx) (fl+ (fl* dy dy) (fl* dz dz))))
 
-;;------------------------------------------------
+;; Union-Find ------------------------------------
 
-(define (closest-n-pairs coords n)
-  (define len (vector-length coords))
-  
-  ;; Make a heap that counts "largest" as "min"
-  (define h (make-heap (λ (a b) (> (vector-ref a 2) (vector-ref b 2)))))
-  
-  (for* ([i (in-range len)]
-         [j (in-range (add1 i) len)])
-    (define d (squared-dist (vector-ref coords i) (vector-ref coords j)))
-    (cond
-      [(< (heap-count h) n)
-       (heap-add! h (vector i j d))]
-      [(< d (vector-ref (heap-min h) 2))
-       (heap-remove-min! h)
-       (heap-add! h (vector i j d))]))
-  
-  ;; Extract and reverse (heap-min gives largest of the smallest)
-  (define heap-len (heap-count h))
-  (define result (make-vector heap-len))
-  (for ([v (in-heap/consume! h)]
-        [i (in-range (sub1 heap-len) -1 -1)])
-    (vector-set! result i v))
-  result)
+;; Doing my own UF with vectors instead of hash tables (faster since
+;; keys are just 0-999)
 
 (define (make-union-find n)
   (vector (build-vector n values)  ; parent
-          (make-vector n 1)))      ; size (each node starts as set of 1)
+          (make-vector n 1)))      ; track sizes (each node starts as set of 1)
 
 (define (uf-find uf x)
   (define parent (vector-ref uf 0))
@@ -89,6 +68,31 @@
              #:when (= i (vector-ref parent i)))
     (vector-ref size i)))
 
+;;------------------------------------------------
+
+(define (closest-n-pairs coords N)
+  (define len (vector-length coords))
+  
+  ;; Make a heap that counts "largest" as "min"
+  (define h (make-heap (λ (a b) (fl> (vector-ref a 2) (vector-ref b 2)))))
+  (for* ([i (in-range len)]
+         [j (in-range (add1 i) len)])
+    (define d (squared-dist (vector-ref coords i) (vector-ref coords j)))
+    (cond
+      [(< (heap-count h) N)
+       (heap-add! h (vector i j d))]
+      [(fl< d (vector-ref (heap-min h) 2))
+       (heap-remove-min! h)
+       (heap-add! h (vector i j d))]))
+  
+  ;; Extract and reverse (heap-min gives largest of the N smallest distances)
+  (define heap-len (heap-count h))
+  (define result (make-vector heap-len))
+  (for ([v (in-heap/consume! h)]
+        [i (in-range (sub1 heap-len) -1 -1)])
+    (vector-set! result i v))
+  result)
+
 (define (connected-set-sizes coords n-pairs)
   (define pairs (closest-n-pairs coords n-pairs))
   (define uf (make-union-find (vector-length coords)))
@@ -101,7 +105,7 @@
 (define (pt1) (apply * (take (sort (connected-set-sizes coords 1000) >) 3)))
 (check-answer/ns pt1 96672)
 
-;;================================================
+;; Part 2 -----------------------------------------
 
 (define (find-last-connection coords)
   (define len (vector-length coords))
@@ -109,7 +113,7 @@
   (define num-sets len)
   
   (define pairs
-    (let ([h (make-heap (λ (a b) (< (vector-ref a 2) (vector-ref b 2))))])
+    (let ([h (make-heap (λ (a b) (fl< (vector-ref a 2) (vector-ref b 2))))])
       (for* ([i (in-range len)]
              [j (in-range (add1 i) len)])
         (heap-add! h (vector i j (squared-dist (vector-ref coords i)
