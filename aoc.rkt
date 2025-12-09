@@ -38,9 +38,9 @@
   (define-values (results avg-ns) (time-proc/ns thunk rounds))
   (displayln (format "~a: ~a (~a)" who results (fmt-ns avg-ns))))
 
-(define (time-only/ns thunk [rounds 1] [who (object-name thunk)])
+(define (time-only/ns thunk [rounds 1])
   (define-values (_results avg-ns) (time-proc/ns thunk rounds))
-  (displayln (format "~a: ~a" who (fmt-ns avg-ns))))
+  (displayln (format "~a" (fmt-ns avg-ns))))
 
 (define-syntax (check-answer/ns stx)
   (syntax-parse stx
